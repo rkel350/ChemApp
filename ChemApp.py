@@ -2,9 +2,12 @@ import streamlit as st
 from chempy import balance_stoichiometry
 from chempy.util.parsing import formula_to_composition
 import re
+from PIL import Image
 
 if "balanced" not in st.session_state:
     st.session_state.balanced = False
+logo = Image.open("BitsChemLab.png")
+st.image(logo, width=300)
 
 st.title("🧪 Stoichiometry Helper")
 
@@ -228,3 +231,14 @@ if st.button("Convert"):
             st.success(f"{amount} grams of {formula_input} = {moles:.4f} mole(s)")
     except Exception as e:
         st.error(f"❌ Error: {e}")
+
+st.markdown("""
+<hr style="margin-top: 3em; margin-bottom: 1em;">
+
+<div style="text-align: center; font-size: 16px; color: gray;">
+    <p>👀 If you got this far, you probably deserve a snack.</p>
+    <p>🚫 No goggles were harmed in the making of this app.</p>
+    <p style="font-size: 12px;">© Bit’s Chem Lab, 2025. All unstable ions reserved.</p>
+</div>
+""", unsafe_allow_html=True)
+
