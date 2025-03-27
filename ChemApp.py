@@ -3,11 +3,14 @@ from chempy import balance_stoichiometry
 from chempy.util.parsing import formula_to_composition
 import re
 from PIL import Image
+import random
+
+
 
 if "balanced" not in st.session_state:
     st.session_state.balanced = False
-logo = Image.open("BitsChemLab.png")
-st.image(logo, width=300)
+logo = Image.open("bitschemlabpurp.png")
+st.image(logo, width=200)
 
 st.title("🧪 Stoichiometry Helper")
 
@@ -232,13 +235,28 @@ if st.button("Convert"):
     except Exception as e:
         st.error(f"❌ Error: {e}")
 
-st.markdown("""
-<hr style="margin-top: 3em; margin-bottom: 1em;">
+# Random derpy footer lines
+footers = [
+    "👀 If you got this far, you probably deserve a snack.",
+    "🚫 No goggles were harmed in the making of this app.",
+    "🔬 Built with 90% caffeine and 10% panic.",
+    "🔥 If your eyebrows are still intact, congrats!",
+    "🧼 Wash your hands. You touched sulfur.",
+    "💥 Hit reload to simulate an explosion.",
+    "🧪 Slightly more stable than the average group project.",
+    "⚗️ Available in mole-sized servings.",
+    "🥽 No safety goggles? No problem... just kidding. Wear them."
+]
 
+random_footer = random.choice(footers)
+
+# Show the footer
+st.markdown(f"""
+<hr style="margin-top: 3em; margin-bottom: 1em;">
 <div style="text-align: center; font-size: 16px; color: gray;">
-    <p>👀 If you got this far, you probably deserve a snack.</p>
-    <p>🚫 No goggles were harmed in the making of this app.</p>
+    <p>{random_footer}</p>
     <p style="font-size: 12px;">© Bit’s Chem Lab, 2025. All unstable ions reserved.</p>
 </div>
 """, unsafe_allow_html=True)
+
 
