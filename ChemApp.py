@@ -3,6 +3,9 @@ from chempy import balance_stoichiometry
 from chempy.util.parsing import formula_to_composition
 import re
 
+if "balanced" not in st.session_state:
+    st.session_state.balanced = False
+
 st.title("🧪 Stoichiometry Helper")
 
 # --------------------------------------
@@ -18,6 +21,8 @@ st.markdown("""
 
 equation_input = st.text_input("Enter unbalanced equation:", "Fe2O3 + C -> Fe + CO")
 show_steps = st.checkbox("Show steps")
+show_bca = st.checkbox("Show B-C-A Table (Before - Change - After)")
+
 
 # Try to split the equation into reactants and products
 try:
@@ -35,6 +40,8 @@ except Exception as e:
 # Only show the balance button if parsing succeeded
 if reactants and products:
     if st.button("Balance Equation"):
+        st.session_state.balanced = True
+    if st.session_state.balanced:
         try:
             reac, prod = balance_stoichiometry(reactants, products)
 
@@ -87,6 +94,58 @@ if reactants and products:
                     st.success("✅ All atoms are balanced!")
                 else:
                     st.warning("⚠️ Not all atoms are balanced. Double-check the equation.")
+
+
+            if show_bca:
+                st.markdown("### 🧪 B-C-A Table Setup")
+
+                # Let user input starting moles for each substance
+                starting_moles = {}
+                st.markdown("#### Enter starting moles for each substance:")
+                all_substances = set(list(reac.keys()) + list(prod.keys()))
+                for compound in all_substances:
+                    starting_moles[compound] = st.number_input(
+                        f"{compound} (mol)", min_value=0.0, value=0.0, step=0.1
+                    )
+
+                # Find limiting reactant based on stoichiometric ratios
+                limiting_ratios = {
+                    compound: starting_moles[compound] / coeff
+                    for compound, coeff in reac.items()
+                    if coeff > 0 and starting_moles[compound] > 0
+                }
+
+                if not limiting_ratios:
+                    st.warning("Please enter starting moles for at least one reactant.")
+                else:
+                    limiting_compound = min(limiting_ratios, key=limiting_ratios.get)
+                    reaction_scale = limiting_ratios[limiting_compound]
+                    st.info(
+                        f"🔍 Limiting reactant: **{limiting_compound}** (based on {reaction_scale:.2f} reaction scale)")
+
+                    # Build BCA Table
+                    st.markdown("### 📊 B-C-A Table")
+
+                    import pandas as pd
+
+                    data = {"Substance": [], "Before (mol)": [], "Change (mol)": [], "After (mol)": []}
+
+                    for compound in all_substances:
+                        coeff_reac = reac.get(compound, 0)
+                        coeff_prod = prod.get(compound, 0)
+                        coeff = coeff_prod - coeff_reac  # Net change
+
+                        before = starting_moles.get(compound, 0.0)
+                        change = coeff * reaction_scale
+                        after = before + change
+
+                        data["Substance"].append(compound)
+                        data["Before (mol)"].append(before)
+                        data["Change (mol)"].append(change)
+                        data["After (mol)"].append(after)
+
+                    df_bca = pd.DataFrame(data)
+                    st.dataframe(df_bca.style.format(precision=2))
 
         except Exception as e:
             st.error(f"❌ Error balancing equation: {e}")
